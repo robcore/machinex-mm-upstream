@@ -1048,7 +1048,10 @@ static int validate_mmap_request(struct file *file,
 	}
 
 	/* allow the security API to have its say */
-	ret = security_file_mmap(file, reqprot, prot, flags, addr, 0);
+	ret = security_mmap_addr(addr);
+	if (ret < 0)
+		return ret;
+	ret = security_mmap_file(file, reqprot, prot, flags);
 	if (ret < 0)
 		return ret;
 
@@ -1480,7 +1483,6 @@ unsigned long do_mmap(struct file *file, unsigned long addr,
 		return -EINVAL;
 	return do_mmap_pgoff(file, addr, len, prot, flag, offset >> PAGE_SHIFT);
 }
-EXPORT_SYMBOL(do_mmap);
 
 unsigned long vm_mmap(struct file *file, unsigned long addr,
 	unsigned long len, unsigned long prot,
